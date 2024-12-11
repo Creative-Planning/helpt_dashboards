@@ -1,0 +1,17 @@
+version: 2
+
+sources:
+  - name: tmetric
+    schema: source
+    tables:
+      - name: members
+        identifier: tmetric_Members
+      - name: projects
+        identifier: tmetric_Projects
+      - name: time_entries
+        identifier: tmetric_TimeEntries
+
+models:
+  - name: stg_tmetric_members
+  - name: stg_tmetric_projects
+  - name: stg_tmetric_time_entries

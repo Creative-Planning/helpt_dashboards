@@ -1,0 +1,26 @@
+version: 2
+
+sources:
+  - name: hubspot
+    schema: source
+    tables:
+      - name: campaigns
+        identifier: hubspot_campaigns
+      - name: companies
+        identifier: hubspot_companies
+      - name: contacts
+        identifier: hubspot_contacts
+      - name: deals
+        identifier: hubspot_deals
+      - name: engagements
+        identifier: hubspot_engagements
+      - name: engagements_calls
+        identifier: hubspot_engagements_calls
+
+models:
+  - name: stg_hubspot_campaigns
+  - name: stg_hubspot_companies
+  - name: stg_hubspot_contacts
+  - name: stg_hubspot_deals
+  - name: stg_hubspot_engagements
+  - name: stg_hubspot_engagements_calls

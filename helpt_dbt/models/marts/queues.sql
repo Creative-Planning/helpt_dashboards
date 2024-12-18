@@ -1,0 +1,1 @@
+SELECT * FROM {{ ref('stg_ringcentral_call_queues') }}

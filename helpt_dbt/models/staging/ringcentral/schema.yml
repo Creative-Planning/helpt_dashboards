@@ -6,6 +6,9 @@ sources:
     tables:
       - name: company_call_log
         identifier: ringcentral_Company_Call_Log
+      - name: call_queues
+        identifier: ringcentral_call_queues
 
 models:
   - name: stg_ringcentral_company_call_log
+  - name: stg_ringcentral_call_queues

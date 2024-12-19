@@ -2,9 +2,9 @@ WITH call_logs AS (
     SELECT
         id,
         'ringcentral' AS eng_source,
-        startTime AS eng_start,
-        NULL AS eng_end,
-        durationMs AS time_spent,
+        "startTime"::timestamp AS eng_start,
+        "startTime"::timestamp + make_interval(secs=>duration) AS eng_end,
+        "durationMs"::decimal AS time_spent,
         "to"->>'phoneNumber' AS to_number,
         "from"->>'phoneNumber' AS from_number,
         result,
@@ -23,7 +23,7 @@ SELECT
     cl.from_number,
     cl.result,
     cl.direction,
-    q.queue_name AS eng_queue
+    q.id::varchar AS eng_queue_id
 FROM call_logs cl
 LEFT JOIN {{ source('ringcentral', 'call_queues') }} q
-    ON cl.extension_id = q.extensionId;
+    ON cl.extension_id = q.id

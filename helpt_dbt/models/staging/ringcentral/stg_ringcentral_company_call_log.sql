@@ -1,16 +1,22 @@
-WITH call_logs AS (
+WITH expanded_call_logs AS (
     SELECT
-        id,
-        'ringcentral' AS eng_source,
-        "startTime"::timestamp AS eng_start,
-        "startTime"::timestamp + make_interval(secs=>duration) AS eng_end,
-        "durationMs"::decimal AS time_spent,
-        "to"->>'phoneNumber' AS to_number,
-        "from"->>'phoneNumber' AS from_number,
-        result,
-        direction,
-        COALESCE("to"->>'extensionId', "from"->>'extensionId') AS extension_id
-    FROM {{ source('ringcentral', 'company_call_log') }}
+        leg->>'telephonySessionId' as id,
+        leg->'from'->>'name' AS from_name,
+        leg->'from'->>'phoneNumber' AS from_number,
+        coalesce(leg->'from'->>'extensionId', leg->'from'->>'extensionNumber') as from_extension,
+        leg->'to'->>'name' AS to_name,
+        leg->'to'->>'phoneNumber' AS to_number,
+        coalesce(leg->'to'->>'extensionId', leg->'to'->>'extensionNumber') as to_extension,
+        leg->>'result' as result,
+        (leg->>'startTime')::timestamp AS eng_start,
+        (leg->>'startTime')::timestamp + make_interval(secs=>(leg->>'durationMs')::decimal/1000) AS eng_end,
+        ((leg->>'durationMs')::decimal /1000)::integer AS time_spent,
+        leg->>'legType' AS leg_type,
+        leg->>'direction' as call_direction,
+        'ringcentral' AS eng_source
+    FROM
+        {{ source('ringcentral', 'company_call_log') }} calls,
+        jsonb_array_elements(calls.legs) leg
 )
 
 SELECT
@@ -22,8 +28,8 @@ SELECT
     cl.to_number,
     cl.from_number,
     cl.result,
-    cl.direction,
+    cl.call_direction as direction,
     q.id::varchar AS eng_queue_id
-FROM call_logs cl
+FROM expanded_call_logs cl
 LEFT JOIN {{ source('ringcentral', 'call_queues') }} q
-    ON cl.extension_id = q.id
+    ON q.id in (cl.from_extension, cl.to_extension)
